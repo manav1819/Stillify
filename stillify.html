@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stillify - Meditation Page</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff; /* AliceBlue */
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #4caf50;
+        }
+
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #meditation-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #breath-circle {
+            width: 50px;
+            height: 50px;
+            background-color: #4caf50;
+            border-radius: 50%;
+            transition: width 4s ease, height 4s ease, background-color 1s ease;
+        }
+
+        #timer {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        #breath-text {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Stillify - Meditation Page</h1>
+        <button onclick="startMeditation(60)">1 Minute</button>
+        <button onclick="startMeditation(180)">3 Minutes</button>
+        <button onclick="startMeditation(300)">5 Minutes</button>
+    </div>
+
+    <div id="meditation-container">
+        <div id="breath-circle"></div>
+        <div id="timer">Get ready...</div>
+        <div id="breath-text"></div>
+        <audio id="background-music" src="background.mp3" preload="auto" loop></audio>
+        <audio id="breathe-in-sound" src="path/to/breathe-in-sound.mp3" preload="auto"></audio>
+        <audio id="hold-in-sound" src="path/to/hold-in-sound.mp3" preload="auto"></audio>
+        <audio id="breathe-out-sound" src="path/to/breathe-out-sound.mp3" preload="auto"></audio>
+    </div>
+
+    <script>
+        function startMeditation(durationInSeconds) {
+            document.getElementById('container').style.display = 'none';
+            document.getElementById('meditation-container').style.display = 'flex';
+
+            var breathCircle = document.getElementById('breath-circle');
+            var breathInSound = document.getElementById('breathe-in-sound');
+            var holdInSound = document.getElementById('hold-in-sound');
+            var breathOutSound = document.getElementById('breathe-out-sound');
+            var backgroundMusic = document.getElementById('background-music');
+            var timerElement = document.getElementById('timer');
+            var breathTextElement = document.getElementById('breath-text');
+
+            var totalTime = durationInSeconds * 1000;
+            var countdownTime = 3000; // 3 seconds for countdown
+            var cycleTime = 12000; // 12 seconds for each cycle
+            var elapsedTime = 0;
+
+            function updateTimer() {
+                var totalMinutes = Math.floor(totalTime / 60000);
+                var totalSeconds = ((totalTime % 60000) / 1000).toFixed(0);
+
+                var elapsedMinutes = Math.floor(elapsedTime / 60000);
+                var elapsedSeconds = ((elapsedTime % 60000) / 1000).toFixed(0);
+
+                timerElement.textContent = `Total Time: ${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds} / Time Passed: ${elapsedMinutes}:${elapsedSeconds < 10 ? '0' : ''}${elapsedSeconds}`;
+            }
+
+            function startCountdown() {
+                var countdownInterval = setInterval(function () {
+                    countdownTime -= 1000;
+                    timerElement.textContent = `Get ready... ${Math.ceil(countdownTime / 1000)}`;
+
+                    if (countdownTime <= 0) {
+                        clearInterval(countdownInterval);
+                        startBreathing();
+                    }
+                }, 1000);
+            }
+
+            function startBreathing() {
+                backgroundMusic.play();
+                breatheIn();
+                var timerInterval = setInterval(function () {
+                    elapsedTime += 1000;
+                    updateTimer();
+
+                    if (elapsedTime >= totalTime) {
+                        clearInterval(timerInterval);
+                        document.getElementById('container').style.display = 'flex';
+                        document.getElementById('meditation-container').style.display = 'none';
+                        backgroundMusic.pause();
+                    } else {
+                        updateBreathText(elapsedTime % cycleTime);
+                    }
+                }, 1000);
+            }
+
+            function updateBreathText(timeInCycle) {
+                if (timeInCycle < 4000) {
+                    breathTextElement.textContent = 'Breathe In';
+                } else if (timeInCycle < 8000) {
+                    breathTextElement.textContent = 'Hold';
+                } else {
+                    breathTextElement.textContent = 'Breathe Out';
+                }
+            }
+
+            function breatheIn() {
+                breathInSound.play();
+                breathTextElement.textContent = 'Breathe In';
+                breathCircle.style.width = '100px';
+                breathCircle.style.height = '100px';
+                breathCircle.style.borderRadius = '50%';
+                breathCircle.style.backgroundColor = '#4caf50';
+
+                setTimeout(function () {
+                    holdInSound.play();
+
+                    setTimeout(function () {
+                        breatheOut();
+                    }, 4000); // 4 seconds for holding breath in
+                }, 4000); // 4 seconds for breath in
+            }
+
+            function breatheOut() {
+                breathOutSound.play();
+                breathTextElement.textContent = 'Breathe Out';
+                breathCircle.style.width = '50px';
+                breathCircle.style.height = '50px';
+                breathCircle.style.borderRadius = '50%';
+                breathCircle.style.backgroundColor = '#45a049';
+
+                setTimeout(function () {
+                    breatheIn();
+                }, 4000); // 4 seconds for breath out
+            }
+
+            startCountdown();
+        }
+    </script>
+</body>
+</html>
